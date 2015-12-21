@@ -76,14 +76,12 @@ def load_room_description(path):
         skip(room_file, 4)
 
         tileset_ids = [oneoff(room_file) for _ in xrange(0x10)]
-
-        tile_ids = [[word(room_file) for _ in xrange(ROOM_TILEWIDTH)]
-                        for _ in xrange(ROOM_TILEHEIGTH)]
+        tile_ids    = [[word(room_file) for _ in xrange(ROOM_TILEWIDTH)]
+                            for _ in xrange(ROOM_TILEHEIGTH)]
 
         skip(room_file, 0x20)
-
-        tile_types = [[next(room_file) for _ in xrange(ROOM_TILEWIDTH)]
-                        for _ in xrange(ROOM_TILEHEIGTH)]
+        tile_types  = [[next(room_file) for _ in xrange(ROOM_TILEWIDTH)]
+                            for _ in xrange(ROOM_TILEHEIGTH)]
 
         rooms.append((
             tileset_ids,
