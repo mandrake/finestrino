@@ -104,8 +104,12 @@ def blit_room(room, tilesets, surface):
             flip       = tile_id & 2
             tileset_nr = tileset_ids[tileset_id]
             tileset    = tilesets[tileset_nr]
+            bitmap     = tileset[tile_nr]
 
-            surface.blit(tileset[tile_nr], (x * TILE_WIDTH, y * TILE_HEIGTH))
+            if flip:
+                bitmap = pygame.transform.flip(bitmap, True, False)
+
+            surface.blit(bitmap, (x * TILE_WIDTH, y * TILE_HEIGTH))
 
 if __name__ == '__main__':
     pygame.init()
@@ -120,17 +124,27 @@ if __name__ == '__main__':
     tilesets   = {i: get_background_tiles(resources.background_tileset(i), palette) for i in (1, 2, 3, 4, 5, 6, 10, 11)}
     rooms      = load_room_description(resources.room_roe())
 
+    current_room = 0
+
+    print "left/right arrow to change room"
+
     while True:
         clock.tick(FPS)
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYUP:
-                quit = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    current_room -= 1
+                if event.key == pygame.K_RIGHT:
+                    current_room += 1
 
             if event.type == pygame.QUIT:
                 quit = True
 
-        blit_room(rooms[0], tilesets, screen)
+        current_room = max(0, current_room)
+        current_room = min(current_room, len(rooms) - 1)
+
+        blit_room(rooms[current_room], tilesets, screen)
 
         pygame.transform.scale(screen, WINDOW_SIZE, pygame.display.get_surface())
         pygame.display.flip()
