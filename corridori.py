@@ -22,7 +22,7 @@ class ResourcesPaths(object):
     def room_roe(self):               return self.gamedir("AR1/MAP/ROOM.ROE")
     def k_ele(self):                  return self.gamedir("AR1/IMG/K.ELE")
     def tr_ele(self):                 return self.gamedir("AR1/IMG/TR.ELE")
-    def ucc_ele(self):                return self.gamedir("AR1/IMG/UCCI0.ELE")
+    def ucc_ele(self, nr):            return self.gamedir("AR1/UCC/UCCI%d.ELE" % nr)
 
 def load_file(path):
     return [ord(i) for i in open(path, 'rb').read()]
@@ -230,9 +230,16 @@ if __name__ == '__main__':
     tilesets   = {i: get_background_tiles(resources.background_tileset(i), palette) for i in (1, 2, 3, 4, 5, 6, 10, 11)}
     rooms      = load_room_description(resources.room_roe())
     kele       = [render_ele_item(i, palette) for i in load_ele_file(resources.k_ele())]
+    trele      = [render_ele_item(i, palette) for i in load_ele_file(resources.tr_ele())]
+    all_ucc    = [load_ele_file(resources.ucc_ele(i)) for i in xrange(2)]
+    all_ucc    = reduce(lambda a, b: a + b, all_ucc)
+    uccele     = [render_ele_item(i, palette) for i in all_ucc]
 
-    current_room = 0
+    current_room             = 0
     current_background_frame = 0
+    current_k_ele            = 0
+    current_tr_ele           = 0
+    current_ucc_ele          = 0
 
     # lol 1992
     background_frame_delay_init = 6
@@ -260,9 +267,15 @@ if __name__ == '__main__':
             current_background_frame = (current_background_frame + 1) % 4
             background_frame_delay = background_frame_delay_init
 
+            current_k_ele = (current_k_ele + 1) % len(kele)
+            current_tr_ele = (current_tr_ele + 1) % len(trele)
+            current_ucc_ele = (current_ucc_ele + 1) % len(uccele)
+
         blit_room(rooms[current_room], tilesets, screen, current_background_frame)
 
-        #screen.blit(kele[0], (10, 10))
+        screen.blit(kele[current_k_ele], (10, 10))
+        screen.blit(trele[current_tr_ele], (40, 10))
+        screen.blit(uccele[current_ucc_ele], (100, 10))
 
         pygame.transform.scale(screen, WINDOW_SIZE, pygame.display.get_surface())
         pygame.display.flip()
