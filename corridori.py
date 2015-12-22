@@ -167,10 +167,14 @@ def load_ele_file(path):
 def render_ele_item(item, palette, col=-63):
     width, heigth, lines = item
 
+    transparency   = (1, 1, 1) # should not be possible for the VGA palette
     the_ele        = iter(lines)
     consecutive_ff = 0
     surface        = pygame.Surface((width, heigth))
     cur_x, cur_y   = 0, 0
+
+    surface.set_colorkey(transparency)
+    surface.fill(transparency)
 
     while True:
         skip = next(the_ele)
