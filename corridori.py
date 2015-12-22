@@ -99,12 +99,27 @@ def load_room_description(path):
 
     return rooms
 
-def blit_room(room, tilesets, surface):
+def blit_room(room, tilesets, surface, frame):
+    def adjust_tile_for_frame(tile_id, frame):
+        if ((tile_id & 0xf0) >> 4) != 9:
+            return tile_id
+
+        frame_to_use = frame
+
+        if tile_id & 8:
+            frame_to_use = 3
+        else:
+            if (tile_id & 4) and (frame == 3):
+                    tile_id = tile_id | 8
+
+        return (tile_id & 0xfcff) | (frame_to_use <<  8)
+
     tileset_ids, tile_ids, tile_types = room
 
     for y in xrange(ROOM_TILEHEIGTH):
         for x in xrange(ROOM_TILEWIDTH):
             tile_id    = tile_ids[y][x]
+            tile_id    = adjust_tile_for_frame(tile_id, frame)
             tile_nr    = ((tile_id & 1) << 8) + (tile_id >>8)
             tileset_id = (tile_id & 0xf0) >> 4
             flip       = tile_id & 2
@@ -146,7 +161,6 @@ def load_ele_file(path):
         lines = reduce(lambda a, b: a + b, lines) + [0xff, 0xff]
 
         images.append((width, heigth, lines))
-
 
     return images
 
@@ -197,6 +211,11 @@ def render_ele_item(item, palette, col=-63):
             if consecutive_ff == 3:
                 return surface
 
+def clamp(thing, interval):
+    low, high = interval
+    x = max(low, thing)
+    x = min(x, high)
+    return x
 
 if __name__ == '__main__':
     pygame.init()
@@ -213,6 +232,11 @@ if __name__ == '__main__':
     kele       = [render_ele_item(i, palette) for i in load_ele_file(resources.k_ele())]
 
     current_room = 0
+    current_background_frame = 0
+
+    # lol 1992
+    background_frame_delay_init = 6
+    background_frame_delay      = background_frame_delay_init
 
     print "left/right arrow to change room"
 
@@ -226,15 +250,19 @@ if __name__ == '__main__':
                 if event.key == pygame.K_RIGHT:
                     current_room += 1
 
+                current_room = clamp(current_room, (0, len(rooms) - 1))
+
             if event.type == pygame.QUIT:
                 quit = True
 
-        current_room = max(0, current_room)
-        current_room = min(current_room, len(rooms) - 1)
+        background_frame_delay -= 1
+        if background_frame_delay == 0:
+            current_background_frame = (current_background_frame + 1) % 4
+            background_frame_delay = background_frame_delay_init
 
-        blit_room(rooms[current_room], tilesets, screen)
+        blit_room(rooms[current_room], tilesets, screen, current_background_frame)
 
-        screen.blit(kele[0], (10, 10))
+        #screen.blit(kele[0], (10, 10))
 
         pygame.transform.scale(screen, WINDOW_SIZE, pygame.display.get_surface())
         pygame.display.flip()
