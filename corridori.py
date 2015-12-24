@@ -99,7 +99,7 @@ def load_room_description(path):
 
     return rooms
 
-def blit_room(room, tilesets, surface, frame):
+def blit_room(room, tilesets, surface, frame, show_grid):
     def adjust_tile_for_frame(tile_id, frame):
         if ((tile_id & 0xf0) >> 4) != 9:
             return tile_id
@@ -116,6 +116,8 @@ def blit_room(room, tilesets, surface, frame):
 
     tileset_ids, tile_ids, tile_types = room
 
+    surface.fill((100, 100, 100))
+
     for y in xrange(ROOM_TILEHEIGTH):
         for x in xrange(ROOM_TILEWIDTH):
             tile_id    = tile_ids[y][x]
@@ -126,11 +128,13 @@ def blit_room(room, tilesets, surface, frame):
             tileset_nr = tileset_ids[tileset_id]
             tileset    = tilesets[tileset_nr]
             bitmap     = tileset[tile_nr]
+            topleft    = (x * TILE_WIDTH, y * TILE_HEIGTH)
 
             if flip:
                 bitmap = pygame.transform.flip(bitmap, True, False)
 
-            surface.blit(bitmap, (x * TILE_WIDTH, y * TILE_HEIGTH))
+            area =  pygame.Rect((0, 0), TILE_SIZE).inflate(-1, -1) if show_grid else None
+            surface.blit(bitmap, topleft, area)
 
 def load_ele_file(path):
     data        = load_file(path)
@@ -244,6 +248,7 @@ if __name__ == '__main__':
     current_k_ele            = 0
     current_tr_ele           = 0
     current_ucc_ele          = 0
+    current_show_grid        = False
 
     # lol 1992
     background_frame_delay_init = 6
@@ -260,6 +265,8 @@ if __name__ == '__main__':
                     current_room -= 1
                 if event.key == pygame.K_RIGHT:
                     current_room += 1
+                if event.key == pygame.K_SPACE:
+                    current_show_grid = not current_show_grid
 
                 current_room = clamp(current_room, (0, len(rooms) - 1))
 
@@ -275,7 +282,13 @@ if __name__ == '__main__':
             current_tr_ele = (current_tr_ele + 1) % len(trele)
             current_ucc_ele = (current_ucc_ele + 1) % len(uccele)
 
-        blit_room(rooms[current_room], tilesets, screen, current_background_frame)
+        blit_room(
+            rooms[current_room],
+            tilesets,
+            screen,
+            current_background_frame,
+            current_show_grid,
+        )
 
         screen.blit(kele[current_k_ele], (10, 10))
         screen.blit(trele[current_tr_ele], (40, 10))
