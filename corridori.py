@@ -23,6 +23,7 @@ class ResourcesPaths(object):
     def k_ele(self):                  return self.gamedir("AR1/IMG/K.ELE")
     def tr_ele(self):                 return self.gamedir("AR1/IMG/TR.ELE")
     def ucc_ele(self, nr):            return self.gamedir("AR1/UCC/UCCI%d.ELE" % nr)
+    def animjoy(self):                return self.gamedir("AR1/FIL/ANIMJOY.TAB")
 
 def load_file(path):
     return [ord(i) for i in open(path, 'rb').read()]
@@ -219,6 +220,14 @@ def render_ele_item(item, palette, col=-63):
             if consecutive_ff == 3:
                 return surface
 
+def load_animjoy(path):
+    data    = load_file(path)
+    sizeof  = 18
+    howmany = len(data) // sizeof
+    animjoy = iter(data)
+
+    return [[next(animjoy) for _ in xrange(sizeof)] for _ in xrange(howmany)]
+
 def clamp(thing, interval):
     low, high = interval
     x = max(low, thing)
@@ -242,6 +251,7 @@ if __name__ == '__main__':
     all_ucc    = [load_ele_file(resources.ucc_ele(i)) for i in xrange(2)]
     all_ucc    = reduce(lambda a, b: a + b, all_ucc)
     uccele     = [render_ele_item(i, palette) for i in all_ucc]
+    animjoy    = load_animjoy(resources.animjoy())
 
     current_room             = 0
     current_background_frame = 0
