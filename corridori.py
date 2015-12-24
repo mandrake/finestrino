@@ -220,6 +220,32 @@ def render_ele_item(item, palette, col=-63):
             if consecutive_ff == 3:
                 return surface
 
+# animjoy is a list of arrays, the inner arrays are indexed based
+# on user input using these indices.
+
+STILL, LEFT, RIGHT, TOP, BOTTOM, NO_RUNNING, RUNNING = xrange(7)
+
+DIRECTIONS_TO_ANIMJOY = {
+    (STILL, STILL,  NO_RUNNING): 0,
+    (STILL, BOTTOM, NO_RUNNING): 1,
+    (RIGHT, BOTTOM, NO_RUNNING): 2,
+    (RIGHT, STILL,  NO_RUNNING): 3,
+    (RIGHT, TOP,    NO_RUNNING): 4,
+    (STILL, TOP,    NO_RUNNING): 5,
+    (LEFT,  BOTTOM, NO_RUNNING): 6,
+    (LEFT,  STILL,  NO_RUNNING): 7,
+    (LEFT,  TOP,    NO_RUNNING): 8,
+    (STILL, STILL,  NO_RUNNING): 9,
+    (STILL, BOTTOM, RUNNING   ): 10,
+    (RIGHT, BOTTOM, RUNNING   ): 11,
+    (RIGHT, STILL,  RUNNING   ): 12,
+    (RIGHT, TOP,    RUNNING   ): 13,
+    (STILL, TOP,    RUNNING   ): 14,
+    (LEFT,  BOTTOM, RUNNING   ): 15,
+    (LEFT,  STILL,  RUNNING   ): 16,
+    (LEFT,  TOP,    RUNNING   ): 17,
+}
+
 def load_animjoy(path):
     data    = load_file(path)
     sizeof  = 18
